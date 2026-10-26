@@ -1,1 +1,74 @@
 ( 0 - 0 ) == Libraries
+--- freertos/FreeRTOS.h & freertos/task.h ---
+allows esp32 to do multiple task at a time: read sensor, send wifi, all at once
+Important commands: vTaskDelay(miliseconds)
+documentation: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/freertos.html
+
+
+--- esp_system.h / esp_log.h ---
+esp_system gives the user chip-level utilities like restarting, reseting...
+Important commands: 
+    esp_restart()
+    esp_reset_reason() -- tells why chip booted
+    esp_get_free_heap_size() / esp_get_minimum_free_heap_size -- check memory
+    esp_register_shutdown_handler() -- run cleanup code before a restart
+    esp_random() -- generate random number
+Documentation: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/migration-guides/release-5.x/5.0/system.html
+
+esp_log is like printing out commands. Instead of normal printf, one can define a severity level and source name
+ - > one can filter messages by level. 
+ - > Filter by tag at runtime: example : esp_log_level_set("wifi", ESP_LOG_WARN)
+Important commands:
+    static const char *TAG = "name";  - > set the name of the tag
+    ESP_LOGE(TAG, "big error: %d", err); - > prints RED error
+    ESP_LOGW(TAG, "warning);  - > prints YELLOW warning
+    ESP_LOGI(TAG, "information");  - > prints GREEN general information
+    ESP_LOGD(TAG, "x = %d, x)  - > detailed infomation debug [hidden by default] 
+    ESP_LOGV(TAG, "detailed trace") - > detailed verbose tracing of code [hidden by default]
+Documentation: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/log.html
+
+
+--- onewire_bus.h ---
+This library provdes an medium for communicating with Dallas/Maxim 1-Wire devices: ds18b20 thermometer
+ - > supports RMT and UART backends
+ - > handles low-level timing requirements of 1-Wire protocol 
+Important commands: 
+    onewire_bus_config_t bus_config = {   - > configuration
+      .bus_gpio_num = **GPIO pin number**
+      .flags = { 
+        .en_pull_up = false/true  - > status of the internal pull-up resistor of the esp32
+      }
+    }
+    onewire_bus_rmt_config_t rmt_config = {    - > RMT backend configuration
+      .max_rx_bytes = 10,      - > maximum bytes expected in a single receive operation
+    }
+    onewire_bus_handle_t bus = NULL   - > create 1-wirebus handle
+    plenty more: check documentation
+Documentation: https://espressif.github.io/idf-extra-components/latest/onewire_bus/index.html
+
+
+--- esp_wifi.h ---
+Supports wifi communcation and stuff
+Documentation: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/network/esp_wifi.html
+
+
+
+--- esp_now.h ---
+This library allows for the WiFi protocol ESPNOW to be in used. This can be used to communicate esp32 devices to other devices
+Important commands: 
+    static const uint8_t RECEIVER_MAC[ESP_NOW_ETH_ALEN] = {---}
+    esp_now_init()    - > initialization
+    esp_now_deinit()  - > shut down
+    esp_now_register_send_cb(cb)  - >  callback after each send to check success status
+    esp_now_register_recv_cb(cb)  - >  callback when receive to check success status
+    esp_now_add_peer(&peer_info)  - >  register a device by MAC Address
+    esp_now_del_peer(mac)   - >  remove a peer
+    esp_now_mod_peer(&peer_info)  - >  set peer setting
+    esp_now_send(mac, data, len)  - >  send data to a peer( or NULL to send to all peer)
+    esp_now_set_pmk(key)   - >  set the primary master key for encryption
+Documentation: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/network/esp_now.html 
+    
+
+
+MCPWM motor control
+Documentation: https://docs.espressif.com/projects/esp-idf/en/v4.4/esp32/api-reference/peripherals/mcpwm.html
